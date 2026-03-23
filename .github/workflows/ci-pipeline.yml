@@ -1,0 +1,31 @@
+name: Node.js CI with Docker Build
+
+on:
+  push:
+    branches: [ "main" ]  # หุ่นยนต์จะทำงานทุกครั้งที่ push ขึ้นกิ่ง main
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest  # ใช้เครื่อง Linux ของ GitHub ในการรัน
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3  # ดึงโค้ดจาก Repo มาวางในเครื่องจำลอง
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install  # ติดตั้ง Library ที่จำเป็น
+
+      - name: Lint check (Syntax Check)
+        run: node --check index.js  # ตรวจว่าเขียนโค้ดผิดไวยากรณ์ (Syntax) ไหม
+
+      - name: Build Docker Image
+        run: |
+          docker build -t electricity-api:${{ github.sha }} .
+          echo "Build successful for commit ${{ github.sha }}"
